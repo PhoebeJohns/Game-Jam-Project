@@ -16,8 +16,8 @@ TagManager:
   - Trigger
   - Terminal
   - Checkpoint
-  - 
-  - 
+  - GameEnd
+  - Coin
   - 
   - 
   - 

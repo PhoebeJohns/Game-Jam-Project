@@ -39,25 +39,37 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.layer == 7)
         {
-            StartCoroutine(Respawn(collision.gameObject.transform.position));
+            StartCoroutine(Respawn(false));
         }
     }
 
-    public IEnumerator Respawn(Vector3 deathPos)
+    public void GameEnd()
+    {
+        StartCoroutine(Respawn(true));
+    }
+
+    public IEnumerator Respawn(bool gameEnd)
     {
         dead = true;
         rb.velocity = Vector3.zero;
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 75; i++)
         {
-            spriteRenderer.color = new Color(1, 1, 1, spriteRenderer.color.a - 0.02f);
+            spriteRenderer.color = new Color(1, 1, 1, spriteRenderer.color.a - 0.0166f);
             yield return new WaitForSeconds(0.01f);
         }
-        dead = false;
-        spriteRenderer.color = new Color(1, 1, 1, 1);
-        transform.parent = currentCheckpoint.transform;
-        transform.localPosition = new Vector3(0.25f, -0.5f, 0);
-        transform.parent = null;
-        gravityMode = currentCheckpoint.gravityMode;
+        if (!gameEnd)
+        {
+            dead = false;
+            spriteRenderer.color = new Color(1, 1, 1, 1);
+            transform.parent = currentCheckpoint.transform;
+            transform.localPosition = new Vector3(0.25f, -0.5f, 0);
+            transform.parent = null;
+            gravityMode = currentCheckpoint.gravityMode;
+        }
+        else
+        {
+            Debug.Log("Game End!");
+        }
     }
 
     // Update is called once per frame
