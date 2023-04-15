@@ -30,6 +30,7 @@ public class TerminalController : MonoBehaviour
             {
                 zoomedOut = !zoomedOut;
                 player.movementIsLocked = !player.movementIsLocked;
+                player.velocityX = 0;
                 camera.isZoomedOut = !camera.isZoomedOut;
             }
         }

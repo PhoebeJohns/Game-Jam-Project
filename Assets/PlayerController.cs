@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
@@ -9,6 +12,8 @@ public class PlayerController : MonoBehaviour
     public CameraController cameraController;
     public Camera mainCamera;
     public SpriteRenderer spriteRenderer;
+    public TextMeshProUGUI timerText;
+    public GameObject speedrunOverlay;
 
     public CheckpointController currentCheckpoint;
     private bool hasCheckpoint = true;
@@ -17,6 +22,8 @@ public class PlayerController : MonoBehaviour
     public float velocityY;
 
     private float targetVelocityX = 0;
+
+    public bool facingRight = true;
 
     public float moveSpeed = 2;
     public float moveSpeedLerp = 10;
@@ -43,6 +50,13 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void Start()
+    {
+        GameController.playerTime = 0;
+        timerText.enabled = GameController.speedrunMode;
+        speedrunOverlay.SetActive(GameController.speedrunMode);
+    }
+
     public void GameEnd()
     {
         StartCoroutine(Respawn(true));
@@ -63,18 +77,45 @@ public class PlayerController : MonoBehaviour
             spriteRenderer.color = new Color(1, 1, 1, 1);
             transform.parent = currentCheckpoint.transform;
             transform.localPosition = new Vector3(0.25f, -0.5f, 0);
+            velocityX = 0;
+            velocityY = 0;
             transform.parent = null;
             gravityMode = currentCheckpoint.gravityMode;
         }
         else
         {
-            Debug.Log("Game End!");
+            SceneManager.LoadScene(2);
         }
+    }
+
+    public void ResetScene()
+    {
+        SceneManager.LoadScene(1);
+    }
+
+    public void QuitScene()
+    {
+        SceneManager.LoadScene(0);
     }
 
     // Update is called once per frame
     void Update()
     {
+        //Time
+        GameController.playerTime += Time.deltaTime;
+        if (GameController.speedrunMode)
+        {
+            //Timer
+            TimeSpan t = TimeSpan.FromSeconds(GameController.playerTime);
+            timerText.text = t.ToString("hh':'mm':'ss'.'fff");
+            int loopLimit = 100;
+            while (loopLimit > 0 && timerText.text.Length > 8 && (timerText.text[0] == '0' || timerText.text[0] == ':'))
+            {
+                timerText.text = timerText.text.Substring(1);
+                loopLimit--;
+            }
+        }
+
         //Gravity
         if (gravityMode != lastGravityMode && !dead)
         {
@@ -138,6 +179,10 @@ public class PlayerController : MonoBehaviour
 
                 //Update rigidbody
                 rb.velocity = GetRotatedVector(new Vector2(velocityX, velocityY));
+
+                if (velocityX > 0) facingRight = true;
+                if (velocityX < 0) facingRight = false;
+                spriteRenderer.transform.localScale = new Vector3(facingRight ? 1 : -1, 1, 1);
             }
         }
         else
